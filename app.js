@@ -6,7 +6,14 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const userRouter = require('./routes/userRoutes');
+const globalErrorHandler = require('./controller/errorController');
+const AppError = require('./utils/appError');
+const cors = require('cors');
+const authController = require('./controller/authController');
 const app = express();
+
+app.use(cors());
 
 // Set secuitry http header
 app.use(helmet());
@@ -21,7 +28,7 @@ const limiter = rateLimit({
     message: 'Too many request from this ip, Please try again in an hour'
 });
 
-app.use('/api', limiter);
+app.use('/api/v1/users', limiter);
 
 // Body parser, reading data from the body into req body
 app.use(express.json({
@@ -47,5 +54,21 @@ app.use(hpp({
         // specify parameter that cannnot be pollutated
     ]
 }));
+
+// Routes
+app.use('/api/v1/users', userRouter);
+
+app.get('/api/v1/login',authController.login);
+
+app.get('/test', ((req,res) => {
+    res.status(201).json({success:'true'});
+}));
+
+app.all('*', (req, res, next) => {
+    next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));  // anything passed to next is understandable that it is an error and it will send the error to the global error handling middleware
+})
+
+// Error Handling middleware
+app.use(globalErrorHandler);
 
 module.exports = app
