@@ -14,6 +14,20 @@ exports.deleteOne = Model => catchAsync(async (req, res, next) => {
     });
 });
 
+exports.deleteSoft = Model => catchAsync(async (req, res, next) => {
+    const deletedDoc = await Model.findByIdAndUpdate(req.params.id, {
+        deleted: true,
+        deletedAt: Date.now(),
+        deletedBy: req.user.id
+    })
+    res.status(201).json({
+        status: 'success',
+        data: {
+            data: deletedDoc
+        }
+    });
+})
+
 exports.updateOne = Model => catchAsync(async (req, res, next) => {
     const updatedDocument = await Model.findByIdAndUpdate(req.params.id, req.body, {
         new: true,

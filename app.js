@@ -7,6 +7,9 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const userRouter = require('./routes/userRoutes');
+const stageRouter = require('./routes/stageRoutes');
+const jobRouter = require('./routes/jobRoutes');
+const sourceRouter = require('./routes/applicationSourceRoutes');
 const globalErrorHandler = require('./controller/errorController');
 const AppError = require('./utils/appError');
 const cors = require('cors');
@@ -57,9 +60,10 @@ app.use(hpp({
 
 // Routes
 app.use('/api/v1/users', userRouter);
-
-app.get('/api/v1/login',authController.login);
-
+app.use('/api/v1/jobs', jobRouter);
+app.use('/api/v1/stages', stageRouter);
+app.use('/api/v1/application-source', sourceRouter);
+app.get('/api/v1/login', authController.login);
 app.get('/test', ((req,res) => {
     res.status(201).json({success:'true'});
 }));

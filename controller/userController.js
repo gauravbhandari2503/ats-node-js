@@ -3,12 +3,12 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handleFactory');
 const APIFeatures = require('./../utils/apiFeatures');
+const Email = require('./../utils/email');
 
 exports.getAllUsers = catchAsync(async(req,res,next) => {
     let filter = {};
     req.query.deleted = {ne:'true'};
     req.query.archived = {ne:'true'};
-    req.query.sort = 'createdAt';
     const features = new APIFeatures(User.find(filter), req.query).filter().sort().limitFields().paginate();
     // const document = await features.query.explain();
     const document = await features.query;
@@ -57,11 +57,13 @@ exports.getUser = factory.getOne(User);
 
 exports.createUser = catchAsync(async(req, res, next) => {
     req.body.createdBy = req.user.id;
-    const updatedUser = await User.create(req.body);
+    const newUser = await User.create(req.body);
+    const url = `http://localhost:8080/`;
+    await new Email(newUser, url).sendInvite();
     res.status(201).json({
         status: 'success',
         data: {
-            data: updatedUser
+            data: newUser
         }
     });
 });
@@ -81,19 +83,7 @@ exports.updateUser = catchAsync(async(req, res, next) => {
     });
 });
 
-exports.deleteUser = catchAsync(async(req, res, next) => {
-    const deletedUser = await User.findByIdAndUpdate(req.params.id, {
-        deleted: true,
-        deletedAt: Date.now(),
-        deletedBy: req.user.id
-    })
-    res.status(201).json({
-        status: 'success',
-        data: {
-            data: deletedUser
-        }
-    });
-});
+exports.deleteUser = factory.deleteSoft(User);
 
 
 exports.archiveUser = catchAsync(async(req, res, next) => {

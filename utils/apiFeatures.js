@@ -8,9 +8,8 @@ class APIFeatures {
         const queryObj = {...this.queryString};
         const excludedFields = ['page', 'sort', 'limit', 'fields'];
         excludedFields.forEach(el => delete queryObj[el]);
-
         let queryString = JSON.stringify(queryObj);
-        queryString = queryString.replace(/\b(gte|gt|lte|lt|ne)\b/g, match => `$${match}`);  // regular expression g flag means that it will change all the occurence.
+        queryString = queryString.replace(/\b(gte|gt|lte|lt|ne|eq)\b/g, match => `$${match}`);  // regular expression g flag means that it will change all the occurence.
         this.query = this.query.find(JSON.parse(queryString))
 
         return this;
