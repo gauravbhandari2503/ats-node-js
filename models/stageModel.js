@@ -12,7 +12,6 @@ const stageSchema = new mongoose.Schema({
         min: 0,
         max: 6,
         unique: true,
-        select: false
     }
 }, {
     toJSON: {virtuals:true},

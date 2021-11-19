@@ -3,46 +3,72 @@ const validator = require('validator');
 
 const applicantSchema = new mongoose.Schema({
     blacklist: {
-        type: Boolean,
-        default: false
+        blacklisted: {
+            type: Boolean,
+            default: false
+        },
+        reason: {
+            type: String,
+            maxLength: [150, 'Reason for blacklisting the candidate must not exceed 150 characters.'],
+            default: null
+        },
+        blacklistedBy: {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+        }
     },
     name: {
         type: String,
-        trim: true
+        trim: true,
+        required: [true, 'Applicant must have a name']
     },
     email1: {
         type: String,
-        unique: true,
-        required: [function() { return this.phone1 === null }, 'Primary Email is required if contact is not filled'],
+        required: [function() { if (this.phone1) {return false} else { return true} }, 'Primary Email is required if contact is not filled'],
         lowercase: true,
         validate:[validator.isEmail, 'Please provide a valid email']
     },
     email2: {
         type: String,
-        unique: true,
         lowercase: true,
         validate:[validator.isEmail, 'Please provide a valid email']
     },
     phone1: {
         type: String,
-        unique: true,
-        required: [function() { return this.email1 === null }, 'Contact is required if email is not filled'],
-        validate: [validator.isMobilePhone(phone1, 'any', {strictMode:true})]
+        required: [function()  { if (this.email1) {return false} else { return true} }, 'Contact is required if email is not filled'],
+        validate: [validator.isMobilePhone, 'Invalid Phone number']
     },
     phone2: {
         type: String,
-        unique: true,
-        validate: [validator.isMobilePhone(phone1, 'any', {strictMode:true})]
+        validate: [validator.isMobilePhone,'Invalid Phone number']
     },
     hometown: {
         type: String,
         maxLength: [100, 'Hometown must be less than 100 characters']
     },
+    createdBy: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now(),   
+    },
+    updatedBy: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
+    },
+    updatedAt: {
+        type: Date
+    },
 
 }, {
     toJSON: {virtuals:true},
     toObject: {virtuals:true}
-})
+});
+
+applicantSchema.index({email1:1}, {unique:true, sparse:true});
+applicantSchema.index({email2:1}, {unique:true, sparse:true});
 
 applicantSchema.virtual('comments', {
     ref: 'Comment',
@@ -52,7 +78,7 @@ applicantSchema.virtual('comments', {
 
 applicantSchema.virtual('applications', {
     ref: 'Application',
-    foreignField: 'user',
+    foreignField: 'applicant',
     localField: '_id'
 })
 
