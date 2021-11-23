@@ -69,6 +69,9 @@ const applicantSchema = new mongoose.Schema({
 
 applicantSchema.index({email1:1}, {unique:true, sparse:true});
 applicantSchema.index({email2:1}, {unique:true, sparse:true});
+applicantSchema.index({phone1:1}, {unique:true, sparse:true});
+applicantSchema.index({phone2:1}, {unique:true, sparse:true});
+
 
 applicantSchema.virtual('comments', {
     ref: 'Comment',

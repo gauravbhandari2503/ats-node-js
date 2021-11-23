@@ -12,21 +12,13 @@ const multerStorage = multer.diskStorage({
     filename: (req, file, cb) => {
         // user-id-timestamp
         const extension = file.mimetype.split('/')[1]; // extension
-        cb(null, `user-${req.user.id}-${Date.now()}.${extension}`)
+        cb(null, `user-${Date.now()}.${extension}`)
     }
 });
 
-const multerFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('application')) {
-        cb(null, true);
-    } else {
-        cb(new AppError('Not an image, please upload only images', 400), false);
-    }
-}
 
 const upload = multer({
     storage: multerStorage,
-    fileFilter: multerFilter
 });
 
 exports.uploadApplicantResume = upload.single('resume');
@@ -44,7 +36,7 @@ exports.actionPerformed = (action) => {
             req.body.deletedBy = req.user.id;
             req.body.deletedAt = Date.now();   
         } else {
-            return next(new AppError('Invalid action passed to the actionPerformed Middleware',404))
+            return next(new AppError('Invalid action passed to the actionPerformed Middleware',404));
         }
         next();
     }
@@ -70,29 +62,16 @@ exports.createApplicant = catchAsync(async(req, res, next) => {
             ]
         })
         // 1.b) If any application is active against that applicant than show error message
-        if (application.length > 0) {
-            return res.status(409).json({
-                status: 'error',
-                message: 'Appication against this applicant is active',
-                activeApplication: application
-            })
-        }
+        if (application.length > 0) return next(new AppError('Appication against this applicant is active', 409, application));
 
         // 1.c) If any application is not active against that applicant, check if applicant is blacklisted or not and then check for action status, if true create new application against that applicant
-        if(applicant.blacklist.blacklisted === true) return next(new AppError('Cannot create application for the blacklisted applicant'))
-        if (req.body.action === 'CREATE_NEW') {
-            const newApplication = await Application.create({
-                applicant: applicant.id,
-                currentSalary: req.body.currentSalary,
-                expectedSalary: req.body.expectedSalary,
-                job: req.body.job,
-                jobLocation: req.body.jobLocation,
-                applicationSource: req.body.applicationSource,
-                experienceYear: req.body.experienceYear,
-                experienceMonth: req.body.experienceMonth,
-                status: 'IN_PROGRESS',
-            });
+        if(applicant.blacklist.blacklisted === true) return next(new AppError('Cannot create application for the blacklisted applicant'));
 
+        if (req.body.action === 'CREATE_NEW') {
+            if (req.file) req.body.document = req.file.filename; 
+            req.body.applicant = applicant.id;
+            req.body.status = "IN_PROGRESS";
+            const newApplication = await Application.create(req.body);
             res.status(201).json({
                 status: 'success',
                 message: `Application created successfully for applicant ${applicant.name}`,
@@ -113,6 +92,7 @@ exports.createApplicant = catchAsync(async(req, res, next) => {
             await Comment.create(req.body);
         }
         req.body.status = 'IN_PROGRESS';
+        if (req.file) req.body.document = req.file.filename; 
         const newApplication = await Application.create(req.body);
         res.status(201).json({
             status: 'success',

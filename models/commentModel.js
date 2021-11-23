@@ -11,13 +11,12 @@ const commentSchema = new mongoose.Schema({
         ref: 'User'
     },
     // Parent Referencing - Referring to Applicant Model
-    applicant: [
-        {
-            type: mongoose.Schema.ObjectId,
-            ref: 'User',
-            required: [true, 'Comment must belong to a user']
-        }
-    ],
+    applicant:
+    {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: [true, 'Comment must belong to a user']
+    },
     createdAt: {
         type: Date,
         default: Date.now(),   

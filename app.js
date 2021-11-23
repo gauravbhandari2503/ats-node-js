@@ -65,7 +65,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/jobs', jobRouter);
 app.use('/api/v1/stages', stageRouter);
 app.use('/api/v1/application-source', sourceRouter);
-app.use('/api/v1/applicant', applicantRouter);
+app.use('/api/v1/applicants', applicantRouter);
 app.use('/api/v1/applications', applicationRouter);
 app.get('/api/v1/login', authController.login);
 app.get('/test', ((req,res) => {
