@@ -42,7 +42,7 @@ const applicationSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'Stage',
     },
-    assignee: {
+    applicationAssign: {
         type: mongoose.Schema.ObjectId,
         ref: 'User'
     },
@@ -94,6 +94,9 @@ applicationSchema.pre(/^find/, function(next) {
     }).populate({
         path: 'applicationSource',
         select: '-createdAt -createdBy -__v'
+    }).populate({
+        path: 'applicationAssign',
+        select: '-createdAt -createdBy -__v -role -archived -image'
     }).populate({
         path: 'createdBy',
         select: '-createdAt -createdBy -__v -location -archived -image'

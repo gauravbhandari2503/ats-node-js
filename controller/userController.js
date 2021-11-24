@@ -57,8 +57,37 @@ exports.getUser = factory.getOne(User);
 
 exports.createUser = catchAsync(async(req, res, next) => {
     req.body.createdBy = req.user.id;
-    const newUser = await User.create(req.body);
+    const user = await User.find({
+        $and: [
+            {
+                email: {$eq: req.body.email},
+                deleted: true
+            }
+        ]
+    });
+
     const url = `http://localhost:8080/`;
+
+    if (user.length > 0) {
+        const updatedUser = await User.findByIdAndUpdate(user[0].id, {
+            deleted: false,
+            deletedBy: undefined,
+            deletedAt: undefined,
+            active: true,
+            role: req.body.role
+        }, {
+            new: true,
+            runValidators: true
+        });
+        await new Email(updatedUser, url).sendInvite();
+        return res.status(201).json({
+            status: 'success',
+            data: {
+                data: user
+            }
+        });
+    }
+    const newUser = await User.create(req.body);
     await new Email(newUser, url).sendInvite();
     res.status(201).json({
         status: 'success',
@@ -66,6 +95,7 @@ exports.createUser = catchAsync(async(req, res, next) => {
             data: newUser
         }
     });
+        
 });
 
 exports.updateUser = catchAsync(async(req, res, next) => {
@@ -99,4 +129,15 @@ exports.archiveUser = catchAsync(async(req, res, next) => {
             data: archiveUser
         }
     });
+});
+
+
+exports.getAssignees = catchAsync(async(req, res, next) => {
+    const assignees = await User.find({role: { $ne: "admin"}, name: { $ne: null } }).select('-__v -createdAt -createdBy -role -email -image -location -archived');
+    res.status(201).json({
+        status: 'success',
+        data: {
+            data: assignees
+        }
+    })
 });

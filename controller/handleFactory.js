@@ -78,6 +78,8 @@ exports.getOne = (Model,populateOptions) => catchAsync(async (req, res, next) =>
 
 exports.getAll = (Model) => catchAsync(async (req, res, next) => {
     let filter = {};
+    if (req.params.applicantId) filter = {applicant: req.params.applicantId};
+    
     const features = new APIFeatures(Model.find(filter), req.query).filter().sort().limitFields().paginate();
     // const document = await features.query.explain();
     const document = await features.query;

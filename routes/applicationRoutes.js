@@ -8,6 +8,9 @@ router.use(authController.protect);
 router.route('/')
     .get(applicationController.getAllApplications);
 
+router.route('/assignee')
+    .patch(applicationController.changeAssignee);
+
 router.route('/:id/stage/')
     .patch(applicationController.actionPerformed('update'), applicationController.changeApplicationStage);
 

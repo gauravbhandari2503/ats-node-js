@@ -51,10 +51,14 @@ exports.changeApplicationStatus = catchAsync(async(req, res, next) => {
     if (req.body.status === 'LEAD') {
         req.body.active = true;
         req.body.status = 'IN_PROGRESS';
+        req.body.reason = undefined;
         const stage = await Stage.findOne({stateId: {$eq: 0}});
         req.body.stage = stage.id;
         console.log(req.body.stage);
     }
+
+    if (req.body.status !== 'REJECT') delete req.body.reason;
+    if (req.body.status === 'REJECT' && !(req.body.reason)) return next(new AppError('Reason for rejecting the candidate is required', 404));
     const application = await Application.findByIdAndUpdate(req.body.applicationId, req.body, {
         new: true,
         runValidators: true
@@ -63,6 +67,18 @@ exports.changeApplicationStatus = catchAsync(async(req, res, next) => {
     if (!application) return next(new AppError(`No application found with id: ${req.body.applicationId}`));
     res.status(201).json({
         status:'success',
-        messgae: 'Application status changes successfully'
+        messgae: 'Application status changed successfully'
     });
 });
+
+exports.changeAssignee = catchAsync(async(req, res, next) => {
+    const application = await Application.findByIdAndUpdate(req.query.applicationId, {
+        applicationAssign: req.query.applicationAssign
+    }, {
+        runValidators: true
+    });
+    if (!application) return next(new AppError(`No application found with id: ${req.params.id}`), 404);
+    res.status(200).json({
+        status: 'success',
+    })
+})

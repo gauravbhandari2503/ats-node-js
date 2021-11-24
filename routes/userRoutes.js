@@ -7,6 +7,9 @@ router.route('/')
     .get(authController.protect, userController.getAllUsers)
     .post(authController.protect, userController.createUser);
 
+router.route('/assignees')
+    .get(authController.protect, userController.getAssignees);
+
 router.route('/archived')
     .get(authController.protect, userController.getlAllArchiveUsers)
 

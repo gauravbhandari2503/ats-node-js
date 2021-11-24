@@ -4,7 +4,8 @@ const validator = require('validator');
 const commentSchema = new mongoose.Schema({
     comment: {
         type: String,
-        required: [true, 'Stage Name is a required field']
+        required: [true, 'Stage Name is a required field'],
+        maxLength: [200, 'Comment should not exceed 200 characters!!']
     },
     createdBy: {
         type: mongoose.Schema.ObjectId,
@@ -26,6 +27,13 @@ const commentSchema = new mongoose.Schema({
     toObject: {virtuals:true}
 })
 
+commentSchema.pre(/^find/, function(next) {
+    this.populate({
+        path: 'createdBy',
+        select: '-__v -createdBy -role -location -archived'
+    });
+    next();
+});
 
 const Comment = mongoose.model('Comment', commentSchema);
 
