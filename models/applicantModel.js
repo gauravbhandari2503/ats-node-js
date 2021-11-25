@@ -72,6 +72,13 @@ applicantSchema.index({email2:1}, {unique:true, sparse:true});
 applicantSchema.index({phone1:1}, {unique:true, sparse:true});
 applicantSchema.index({phone2:1}, {unique:true, sparse:true});
 
+applicantSchema.pre(/^find/, function(next) {
+    this.populate({
+        path: 'blacklist.blacklistedBy',
+        select: '-__v -createdBy -role -location -archived'
+    });
+    next();
+});
 
 applicantSchema.virtual('comments', {
     ref: 'Comment',

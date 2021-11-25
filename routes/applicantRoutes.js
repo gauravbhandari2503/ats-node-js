@@ -13,11 +13,13 @@ router.route('/')
     .get(applicantController.getApplicant)
     .post(applicantController.uploadApplicantResume, applicantController.actionPerformed('create'), applicantController.createApplicant);
 
+router.get('/blacklist', applicantController.getAllBlacklistedApplicants)
+
 router.route('/:id/blacklist')
     .put(applicantController.blacklistApplicant);
 
-// router.route('/:id/blacklist')
-//     .put(applicantController.whitelistCandidate);
+router.route('/:id/whitelist')
+    .put(applicantController.whitelistApplicant);
 
 router.route('/:id')
     .get(applicantController.updateApplicant);

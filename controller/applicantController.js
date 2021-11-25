@@ -3,6 +3,7 @@ const Applicant = require('./../models/applicantModel');
 const Comment = require('./../models/commentModel');
 const Application = require('./../models/applicationModel');
 const AppError = require('./../utils/appError');
+const APIFeatures = require('./../utils/apiFeatures');
 
 const multer = require('multer');
 const multerStorage = multer.diskStorage({
@@ -131,3 +132,34 @@ exports.blacklistApplicant = catchAsync(async(req, res, next) => {
         applicant,
     })
 });
+
+exports.whitelistApplicant = catchAsync(async(req, res, next) => {
+    let applicant = await Applicant.findById(req.params.id);
+    if (!applicant.blacklist.blacklisted) return next(new AppError('Applicant is already whitelisted', 406));
+    applicant.blacklist.reason = undefined;
+    applicant.blacklist.blacklisted = false;
+    applicant.blacklist.blacklistedBy = undefined;
+    await applicant.save();
+    
+    res.status(201).json({
+        status: 'success',
+        message: `${applicant.name} Successfully Whitelisted`,
+    })
+})
+
+exports.getAllBlacklistedApplicants = catchAsync(async(req, res, next) => {
+
+    let filter = {};
+    
+    const features = new APIFeatures(Applicant.find({
+        'blacklist.blacklisted':true
+    }), req.query).sort().limitFields().paginate();
+    
+    const document = await features.query;
+
+    res.status(201).json({
+        status: 'success',
+        document,
+        totalRecords: document.length
+    })
+})
