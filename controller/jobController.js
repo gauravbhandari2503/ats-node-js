@@ -1,26 +1,8 @@
 const Job = require('./../models/jobModel');
 const JobOpening = require('./../models/jobOpeningModel');
-const factory = require('./handleFactory');
+const factory = require('./handlerFactory');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
-
-// Middleware function 
-exports.actionPerformed = (action) => {
-    return (req, res, next) => {
-        if (action === 'create') {
-            req.body.createdBy = req.user.id;
-        } else if (action === 'update') {
-            req.body.updatedBy = req.user.id;
-            req.body.updatedAt = Date.now();
-        } else if (action === 'delete') {
-            req.body.deletedBy = req.user.id;
-            req.body.deletedAt = Date.now();   
-        } else {
-            return next(new AppError('Invalid action passed to the actionPerformed Middleware',404))
-        }
-        next();
-    }
-};
 
 // Job opening handler functions 
 exports.createJobOpening = factory.createOne(JobOpening);

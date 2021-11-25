@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const applicationController = require('./../controller/applicationController');
 const authController = require('./../controller/authController');
+const factory = require('./../controller/handlerFactory');
 
 router.use(authController.protect);
 
@@ -11,10 +12,13 @@ router.route('/')
 router.route('/assignee')
     .patch(applicationController.changeAssignee);
 
+router.route('/:id/resume')
+    .get(applicationController.getApplicationResume);
+
 router.route('/:id/stage/')
-    .patch(applicationController.actionPerformed('update'), applicationController.changeApplicationStage);
+    .patch(factory.actionPerformed('update'), applicationController.changeApplicationStage);
 
 router.route('/status/')
-    .patch(applicationController.actionPerformed('update'), applicationController.changeApplicationStatus);
+    .patch(factory.actionPerformed('update'), applicationController.changeApplicationStatus);
 
 module.exports = router;

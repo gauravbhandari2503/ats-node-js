@@ -3,25 +3,10 @@ const catchAsync = require('../utils/catchAsync');
 const Applicant = require('./../models/applicantModel');
 const Application = require('./../models/applicationModel');
 const AppError = require('./../utils/appError');
-const factory = require('./handleFactory');
-
-// Middleware function 
-exports.actionPerformed = (action) => {
-    return (req, res, next) => {
-        if (action === 'create') {
-            req.body.createdBy = req.user.id;
-        } else if (action === 'update') {
-            req.body.updatedBy = req.user.id;
-            req.body.updatedAt = Date.now();
-        } else if (action === 'delete') {
-            req.body.deletedBy = req.user.id;
-            req.body.deletedAt = Date.now();   
-        } else {
-            return next(new AppError('Invalid action passed to the actionPerformed Middleware',404))
-        }
-        next();
-    }
-};
+const factory = require('./handlerFactory');
+const fs = require('fs');
+const path = require('path');
+const dirPath = path.join(__dirname, '../public');
 
 exports.getAllApplications = factory.getAll(Application);
 
@@ -81,4 +66,11 @@ exports.changeAssignee = catchAsync(async(req, res, next) => {
     res.status(200).json({
         status: 'success',
     })
+})
+
+exports.getApplicationResume = catchAsync(async(req, res, next) => {
+    const application = await Application.findById(req.params.id);
+    if (application.document.length <= 0) return next(new AppError('No resume found', 404));
+    let file = fs.createReadStream(`${dirPath}/docs/applicants/${application.document[0]}`);
+    file.pipe(res);
 })

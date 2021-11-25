@@ -1,7 +1,7 @@
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
-const factory = require('./handleFactory');
+const factory = require('./handlerFactory');
 const APIFeatures = require('./../utils/apiFeatures');
 const Email = require('./../utils/email');
 
@@ -35,18 +35,11 @@ exports.getlAllArchiveUsers = catchAsync(async(req,res,next) => {
     req.query.archived = {ne:'false'};
     const features = new APIFeatures(User.find(filter), req.query).filter().sort().limitFields().paginate();
     // const document = await features.query.explain();
-    const document = await features.query;
-    
-    const totalRecords = await User.find().countDocuments({
-        $and: [
-            {'deleted': { $ne: true }},
-            {'archived': { $ne: false}}
-        ]
-    });    
+    const document = await features.query;  
     
     res.status(200).json({
         status: 'success',
-        totalRecords,
+        totalRecords: document.length,
         data: {
             document
         }

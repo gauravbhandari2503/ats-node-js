@@ -1,6 +1,6 @@
 const Comment = require('./../models/commentModel');
 const AppError = require('./../utils/appError');
-const factory = require('./handleFactory');
+const factory = require('./handlerFactory');
 
 exports.setCommentUserId = (req, res, next) => {
     // Allow nested routes

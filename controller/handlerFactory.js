@@ -1,6 +1,24 @@
-const catchAsync = require('./../utils/catchAsync');
-const AppError = require('./../utils/appError');
-const APIFeatures = require('./../utils/apiFeatures');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const APIFeatures = require('../utils/apiFeatures');
+
+// Middleware function 
+exports.actionPerformed = (action) => {
+    return (req, res, next) => {
+        if (action === 'create') {
+            req.body.createdBy = req.user.id;
+        } else if (action === 'update') {
+            req.body.updatedBy = req.user.id;
+            req.body.updatedAt = Date.now();
+        } else if (action === 'delete') {
+            req.body.deletedBy = req.user.id;
+            req.body.deletedAt = Date.now();   
+        } else {
+            return next(new AppError('Invalid action passed to the actionPerformed Middleware',404));
+        }
+        next();
+    }
+};
 
 exports.deleteOne = Model => catchAsync(async (req, res, next) => {
     const document = await Model.findByIdAndDelete(req.params.id)
@@ -83,12 +101,11 @@ exports.getAll = (Model) => catchAsync(async (req, res, next) => {
     const features = new APIFeatures(Model.find(filter), req.query).filter().sort().limitFields().paginate();
     // const document = await features.query.explain();
     const document = await features.query;
-    
-    const totalRecords = await Model.find().countDocuments();
+
     // SEND RESPONSE
     res.status(200).json({
         status: 'success',
-        totalRecords,
+        totalRecords: document.length,
         data: {
             document
         }
