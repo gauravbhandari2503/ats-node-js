@@ -53,9 +53,33 @@ const applicationSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: {
-            values: ['IN_PROGRESS', 'IRRELEVANT', 'FUTURE', 'FRESHER', 'ON_HOLD', 'REJECT', 'NONE'],
+            values: ['IN_PROGRESS', 'IRRELEVANT', 'FUTURE', 'FRESHER', 'ON_HOLD', 'REJECT', 'BLACKLIST', 'NONE'],
         },
         required: ['true', 'Application Status cannot be empty!']
+    },
+    result: {
+        passed: {
+            type: Boolean,
+            default: false
+        },
+        joiningDate: {
+            type: Date,
+            default: null
+        },
+        joiningLocation: {
+            type: String,
+            enum: {
+                values: ['HDR', 'DDN'],
+                message: 'Job Location can be either HDR or DDN'
+            }
+        },
+        offerStatus: {
+            type: String,
+            enum: {
+                values: ['Accepted', 'Not Accepted', 'Pending'],
+                message: 'Job Location can be either HDR or DDN'
+            }
+        }
     },
     reason: {
         type: String,

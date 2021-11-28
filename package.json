@@ -10,6 +10,7 @@
   "author": "Gabriel Gaurav",
   "license": "ISC",
   "dependencies": {
+    "awesome-phonenumber": "^2.64.0",
     "axios": "^0.24.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",

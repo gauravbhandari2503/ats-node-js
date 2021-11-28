@@ -24,6 +24,7 @@ exports.changeApplicationStage = catchAsync(async(req, res, next) => {
     }
     if (currentStage === 7 || currentStage === -1) return next(new AppError('Invalid operation', 403));
     const nextStage = await Stage.findOne({stateId: {$eq: currentStage}});
+    if (nextStage.stageName === 'Hired' && nextStage.stateId === 6) application.result.passed = true;
     application.stage = nextStage.id;
     await application.save();
     res.status(201).json({
@@ -34,14 +35,21 @@ exports.changeApplicationStage = catchAsync(async(req, res, next) => {
 exports.changeApplicationStatus = catchAsync(async(req, res, next) => {
     req.body.active = false;
     if (req.body.status === 'LEAD') {
-        req.body.active = true;
-        req.body.status = 'IN_PROGRESS';
-        req.body.reason = undefined;
+        req.body.status = 'NONE';
+        let tempApplication = await Application.findById(req.body.applicationId, {id: 0});
+        if (!tempApplication) return next(new AppError(`No application found with id: ${req.body.applicationId}`));
+        tempApplication = tempApplication.toObject();
+        tempApplication.active = true;
+        tempApplication.status = 'IN_PROGRESS';
+        tempApplication.reason = undefined;
+        tempApplication.result.passed = false;
+        tempApplication.result.joiningDate = null;
+        delete tempApplication.result.passed;
         const stage = await Stage.findOne({stateId: {$eq: 0}});
-        req.body.stage = stage.id;
-        console.log(req.body.stage);
+        tempApplication.stage = stage.id;
+        delete tempApplication._id;
+        const newApplication = await Application.create(tempApplication);
     }
-
     if (req.body.status !== 'REJECT') delete req.body.reason;
     if (req.body.status === 'REJECT' && !(req.body.reason)) return next(new AppError('Reason for rejecting the candidate is required', 404));
     const application = await Application.findByIdAndUpdate(req.body.applicationId, req.body, {
@@ -52,7 +60,7 @@ exports.changeApplicationStatus = catchAsync(async(req, res, next) => {
     if (!application) return next(new AppError(`No application found with id: ${req.body.applicationId}`));
     res.status(201).json({
         status:'success',
-        messgae: 'Application status changed successfully'
+        message: 'Application status changed successfully'
     });
 });
 

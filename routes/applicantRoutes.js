@@ -11,8 +11,10 @@ router.use('/:applicantId/comments', commentRouter);
 router.use(authController.protect);
 
 router.route('/')
-    .get(applicantController.getApplicant)
     .post(applicantController.uploadApplicantResume, factory.actionPerformed('create'), applicantController.createApplicant);
+
+router.route('/merge-applicant')
+    .put(factory.actionPerformed('update'), applicantController.mergeApplicant);
 
 router.get('/blacklist', applicantController.getAllBlacklistedApplicants)
 
@@ -23,6 +25,7 @@ router.route('/:id/whitelist')
     .put(applicantController.whitelistApplicant);
 
 router.route('/:id')
-    .get(applicantController.updateApplicant);
+    .get(applicantController.getApplicant)
+    .put(applicantController.uploadApplicantResume, factory.actionPerformed('update'), applicantController.updateApplicant);
 
 module.exports = router;

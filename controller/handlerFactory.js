@@ -77,7 +77,11 @@ exports.createOne = Model => catchAsync(async (req, res, next) => {
 
 exports.getOne = (Model,populateOptions) => catchAsync(async (req, res, next) => {
     let query = Model.findById(req.params.id);
-    if (populateOptions)  query = query.populate(populateOptions) 
+    if (populateOptions.length > 0) {
+        populateOptions.forEach(el => {
+            query = query.populate(el);
+        })
+    }
 
     const document = await query;
     // Tour.findOne({ _id: req.params.id}) long method
