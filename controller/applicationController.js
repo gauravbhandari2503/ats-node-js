@@ -1,6 +1,5 @@
 const Stage = require('../models/stageModel');
 const catchAsync = require('../utils/catchAsync');
-const Applicant = require('./../models/applicantModel');
 const Application = require('./../models/applicationModel');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
@@ -74,7 +73,21 @@ exports.changeAssignee = catchAsync(async(req, res, next) => {
     res.status(200).json({
         status: 'success',
     })
-})
+});
+
+exports.updateApplicationResults = catchAsync(async(req, res, next) => {
+    const application = await Application.findByIdAndUpdate(req.body.applicationId, {
+        result : req.body.result
+    }, {
+        runValidators: true
+    });
+    console.log(req.body);
+    if (!application) return next(new AppError(`No application found with id: ${req.params.id}`), 404);
+    res.status(200).json({
+        status: 'success',
+    })
+});
+
 
 exports.getApplicationResume = catchAsync(async(req, res, next) => {
     const application = await Application.findById(req.params.id);

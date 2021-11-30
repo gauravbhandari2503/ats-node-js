@@ -31,7 +31,8 @@ exports.createApplicant = catchAsync(async(req, res, next) => {
     const {email1, phone1} = req.body;
     const applicant = await Applicant.findOne({
         $or: [
-            {email1, phone1}
+            {email1},
+            {phone1}
         ]
     });
 
@@ -51,23 +52,18 @@ exports.createApplicant = catchAsync(async(req, res, next) => {
         // 1.c) If any application is not active against that applicant, check if applicant is blacklisted or not and then check for action status, if true create new application against that applicant
         if(applicant.blacklist.blacklisted === true) return next(new AppError('Cannot create application for the blacklisted applicant'));
 
-        if (req.body.action === 'CREATE_NEW') {
-            if (req.file) req.body.document = req.file.filename; 
-            req.body.applicant = applicant.id;
-            req.body.status = "IN_PROGRESS";
-            const newApplication = await Application.create(req.body);
-            res.status(201).json({
-                status: 'success',
-                message: `Application created successfully for applicant ${applicant.name}`,
-                newApplication
-            })
-        } else {
-            res.status(404).json({
-                status: 'error',
-                message: 'Please specify the action for creating the new application',
-                name: 'ACTION_ERROR'
-            });
-        }
+        if (req.body.action !== 'CREATE_NEW') return next(new AppError('Applicant already existing in the system, but do no have any active applications !', 409, application));
+
+        if (req.file) req.body.document = req.file.filename; 
+        req.body.applicant = applicant.id;
+        req.body.status = "IN_PROGRESS";
+        const newApplication = await Application.create(req.body);
+        res.status(201).json({
+            status: 'success',
+            message: `Application created successfully for applicant ${applicant.name}`,
+            newApplication
+        })
+        
     // 2) If email or phone does not exist create one applicant and one application against that user
     } else {
         const newApplicant = await Applicant.create(req.body);

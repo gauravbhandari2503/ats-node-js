@@ -77,7 +77,13 @@ const applicationSchema = new mongoose.Schema({
             type: String,
             enum: {
                 values: ['Accepted', 'Not Accepted', 'Pending'],
-                message: 'Job Location can be either HDR or DDN'
+                message: 'INVALID OFFER STATUS'
+            }
+        }, 
+        followUpStatus: {
+            type: String,
+            enum: {
+                values: ['Follow-up Email', 'Follow-up Call']
             }
         }
     },

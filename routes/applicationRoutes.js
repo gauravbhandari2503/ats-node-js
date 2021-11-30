@@ -12,6 +12,9 @@ router.route('/')
 router.route('/assignee')
     .patch(applicationController.changeAssignee);
 
+router.route('/update-application-results')
+    .patch(applicationController.updateApplicationResults);
+ 
 router.route('/:id/resume')
     .get(applicationController.getApplicationResume);
 
