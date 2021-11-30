@@ -11,6 +11,7 @@ const commentRouter = require('./routes/commentRoutes');
 const stageRouter = require('./routes/stageRoutes');
 const jobRouter = require('./routes/jobRoutes');
 const sourceRouter = require('./routes/applicationSourceRoutes');
+const interviewRouter = require('./routes/interviewRoutes');
 const applicantRouter = require('./routes/applicantRoutes');
 const applicationRouter = require('./routes/applicationRoutes');
 const globalErrorHandler = require('./controller/errorController');
@@ -69,6 +70,7 @@ app.use('/api/v1/application-source', sourceRouter);
 app.use('/api/v1/applicants', applicantRouter);
 app.use('/api/v1/applications', applicationRouter);
 app.use('/api/v1/comments', commentRouter);
+app.use('/api/v1/interviews', interviewRouter);
 app.get('/api/v1/login', authController.login);
 app.get('/test', ((req,res) => {
     res.status(201).json({success:'true'});

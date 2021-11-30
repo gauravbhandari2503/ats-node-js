@@ -140,12 +140,20 @@ applicationSchema.pre('save', async function(next) {
         this.stage = stage.id;
     }
     next();
-})
+});
 
 applicationSchema.virtual('interviews', {
     ref: 'Interview',
     foreignField: 'application',
     localField: '_id'
+});
+
+applicationSchema.pre(/^find/, function(next) {
+    this.populate({
+        path:'interviews',
+        select: '-application'
+    });
+    next();
 })
 
 const Application = mongoose.model('Application', applicationSchema);

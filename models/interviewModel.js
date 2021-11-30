@@ -6,24 +6,14 @@ const interviewSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    application: [
-        {
-            type: mongoose.Schema.ObjectId,
-            ref: 'Application',
-            required: [true,'Interview scheduled for that application need to filled'],
-        }
-    ],
+    application: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Application',
+        required: [true,'Interview scheduled for that application need to filled'],
+    },
     date: {
         type: Date,
         required: [true,'Interview Date on which it will be scheduled is required'],
-    },
-    from: {
-        type: Date,
-        required: [true,'Interview Time from is a required field'],
-    },
-    to: {
-        type: Date,
-        required: [true,'Interview Time to is a required field'],
     },
     interviewType: {
         type: String,
