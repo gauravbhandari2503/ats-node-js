@@ -69,7 +69,7 @@ const applicationSchema = new mongoose.Schema({
         joiningLocation: {
             type: String,
             enum: {
-                values: ['HDR', 'DDN'],
+                values: ['HDR', 'DDN', 'NONE'],
                 message: 'Job Location can be either HDR or DDN'
             }
         },
@@ -77,7 +77,7 @@ const applicationSchema = new mongoose.Schema({
             type: String,
             enum: {
                 values: ['Accepted', 'Not Accepted', 'Pending'],
-                message: 'INVALID OFFER STATUS'
+                message: 'INVALID OFFER STATUS',
             }
         }, 
         followUpStatus: {
@@ -132,7 +132,13 @@ applicationSchema.pre(/^find/, function(next) {
         select: '-createdAt -createdBy -__v -location -archived -image'
     });
     next();
-})
+});
+
+applicationSchema.virtual('interview', {
+    ref: 'Interview',
+    foreignField: 'application',
+    localField: '_id'
+});
 
 applicationSchema.pre('save', async function(next) {
     if (this.isNew) {
@@ -142,16 +148,10 @@ applicationSchema.pre('save', async function(next) {
     next();
 });
 
-applicationSchema.virtual('interviews', {
-    ref: 'Interview',
-    foreignField: 'application',
-    localField: '_id'
-});
 
 applicationSchema.pre(/^find/, function(next) {
     this.populate({
-        path:'interviews',
-        select: '-application'
+        path:'interview'
     });
     next();
 })

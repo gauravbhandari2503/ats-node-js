@@ -39,6 +39,13 @@ const interviewSchema = new mongoose.Schema({
     toObject: {virtuals:true}
 })
 
+interviewSchema.pre(/^find/, function(next) {
+    this.populate({
+        path: 'interviewer',
+        select: '-__v -createdBy -role -location -archived'
+    });
+    next();
+});
 
 const Interview = mongoose.model('Interview', interviewSchema);
 

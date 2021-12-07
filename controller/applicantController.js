@@ -29,12 +29,18 @@ exports.uploadApplicantResume = upload.single('resume');
 exports.createApplicant = catchAsync(async(req, res, next) => {
     // 1) Check email or phone already exist or not
     const {email1, phone1} = req.body;
+    
     const applicant = await Applicant.findOne({
         $or: [
-            {email1},
-            {phone1}
+            {
+                email1: { $exists:true, $eq:email1}
+            },
+            {
+                phone1: { $exists:true, $eq:phone1}
+            }
         ]
     });
+
 
     // 1.a) If exist, check any application is active against that applicant 
     if (applicant) {
@@ -133,8 +139,8 @@ exports.mergeApplicant = catchAsync(async(req, res, next) => {
         if (!sourceApplicant.hometown) sourceApplicant.hometown = targetApplicant.hometown;
 
         let updateToSourceActiveApplication = {};
-        if (!sourceActiveApplication.job) updateToSourceActiveApplication.job = targetActiveApplication.job.id;
-        if (!sourceActiveApplication.applicationSource) updateToSourceActiveApplication.applicationSource = targetActiveApplication.applicationSource.id; 
+        if (!sourceActiveApplication.job) updateToSourceActiveApplication.job = targetActiveApplication.job ? targetActiveApplication.job.id : undefined;
+        if (!sourceActiveApplication.applicationSource) updateToSourceActiveApplication.applicationSource = targetActiveApplication.applicationSource ? targetActiveApplication.applicationSource.id : undefined; 
         if (!sourceActiveApplication.jobLocation) updateToSourceActiveApplication.jobLocation = targetActiveApplication.jobLocation;
         if (sourceActiveApplication.document.length < 1) updateToSourceActiveApplication.document = targetActiveApplication.document;
         

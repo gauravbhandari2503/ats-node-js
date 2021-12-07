@@ -15,7 +15,7 @@ const commentSchema = new mongoose.Schema({
     applicant:
     {
         type: mongoose.Schema.ObjectId,
-        ref: 'User',
+        ref: 'Applicant',
         required: [true, 'Comment must belong to a user']
     },
     createdAt: {

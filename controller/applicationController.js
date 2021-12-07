@@ -10,9 +10,9 @@ const dirPath = path.join(__dirname, '../public');
 exports.getAllApplications = factory.getAll(Application);
 
 exports.changeApplicationStage = catchAsync(async(req, res, next) => {
-    const application = await Application.findById(req.params.id);
-    if (application.active === false) return next(new AppError(`Invalid operation: cannot move inactive application`,403));
+    let application = await Application.findById(req.params.id);
     if (!application) return next(new AppError(`No application found with id: ${req.params.id}`), 404);
+    if (application.active === false) return next(new AppError(`Invalid operation: cannot move inactive application`,403));
     let currentStage = application.stage.stateId;    
     if (req.body.event === 'NEXT_STAGE') {
         currentStage += 1;
@@ -41,9 +41,6 @@ exports.changeApplicationStatus = catchAsync(async(req, res, next) => {
         tempApplication.active = true;
         tempApplication.status = 'IN_PROGRESS';
         tempApplication.reason = undefined;
-        tempApplication.result.passed = false;
-        tempApplication.result.joiningDate = null;
-        delete tempApplication.result.passed;
         const stage = await Stage.findOne({stateId: {$eq: 0}});
         tempApplication.stage = stage.id;
         delete tempApplication._id;
@@ -63,26 +60,14 @@ exports.changeApplicationStatus = catchAsync(async(req, res, next) => {
     });
 });
 
-exports.changeAssignee = catchAsync(async(req, res, next) => {
-    const application = await Application.findByIdAndUpdate(req.query.applicationId, {
-        applicationAssign: req.query.applicationAssign
-    }, {
-        runValidators: true
-    });
-    if (!application) return next(new AppError(`No application found with id: ${req.params.id}`), 404);
-    res.status(200).json({
-        status: 'success',
-    })
-});
-
 exports.updateApplicationResults = catchAsync(async(req, res, next) => {
-    const application = await Application.findByIdAndUpdate(req.body.applicationId, {
-        result : req.body.result
-    }, {
-        runValidators: true
-    });
-    console.log(req.body);
+    let application = await Application.findById(req.body.applicationId);
     if (!application) return next(new AppError(`No application found with id: ${req.params.id}`), 404);
+    if (req.body.offerStatus) application.result.offerStatus = req.body.offerStatus;
+    if (req.body.followUpStatus) application.result.followUpStatus = req.body.followUpStatus;
+    if (req.body.joiningLocation) application.result.joiningLocation = req.body.joiningLocation;
+    if (req.body.joiningDate) application.result.joiningDate = req.body.joiningDate;
+    await application.save();
     res.status(200).json({
         status: 'success',
     })
