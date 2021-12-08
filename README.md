@@ -15,7 +15,7 @@ This is a node JS project that uses express framework and MongoDB as database. T
 Make sure you have [Node.js](http://nodejs.org/) and MongoDB(compass) installed.
 
 ```sh
-git clone https://git.rubico.tech/gabriel.gaurav/ats-node-js.git
+git clone https://github.com/gauravbhandari2503/ats-node-js.git
 npm install
 npm start:dev for development
 npm start:prod for production
@@ -32,7 +32,7 @@ Your app should now be running on [localhost:5000](http://127.0.0.1:localhost:50
 
 ##### a. Download zip from the link below:
 
-[Download the latest release](https://git.rubico.tech/gabriel.gaurav/ats-node-js.git)
+[Download the latest release](https://github.com/gauravbhandari2503/ats-node-js.git)
 
 ##### b. Extract the contents of zip and execute the project in your browser:
 
